@@ -15,7 +15,7 @@ async function getPrices() {
       return data;
     }
 
-    const dollar = findContent("p").match(/(\d+)(?:\,(\d{1,2}))?/)[0]
+    const dollar = findContent("p").match(/(\d+)(?:\,(\d{1,2}))?/)[0].replace(",", ".")
     const date = findContent("small:nth-of-type(2)", "innerHTML").replace("<br>", "  ")
 
     console.log({ dollar })
