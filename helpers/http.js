@@ -2,7 +2,7 @@ const axios = require("axios").default;
 const { JSDOM } = require("jsdom");
 
 async function getPrices() {
-  const url = "http://www.bcv.org.ve/";
+  const url = "https://www.bcv.org.ve/";
   try {
     const htmltext = await axios.get(url);
     const dom = new JSDOM(htmltext.data);
