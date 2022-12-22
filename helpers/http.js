@@ -1,25 +1,36 @@
 const axios = require("axios").default;
+const https = require("https");
 const { JSDOM } = require("jsdom");
-
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+});
 async function getPrices() {
-  const url = "https://monitordolarvenezuela.com/";
+  const url = "https://www.bcv.org.ve/";
   try {
-    const htmltext = await axios.get(url, {
+    const req = await axios.get(url, {
+      httpsAgent,
       responseType: "text",
-      headers: { "Accept-Encoding": "gzip,deflate,compress" }
+      headers: {
+        "Accept-Encoding": "gzip,deflate,compress",
+        Connection: "keep-alive",
+        "User-Agent":
+          "https://rayobyte.com/blog/most-common-user-agents/#:~:text=Mozilla/5.0%20(Windows%20NT%206.1%3B%20WOW64%3B%20rv%3A12.0)%20Gecko/20100101%20Firefox/12.0",
+      },
     });
-    const dom = new JSDOM(htmltext.data.replaceAll("\n", ""));
 
-    const findContent = (path, prop = "textContent") => {
-      const data = dom.window.document.querySelector("#promedios .row div:nth-of-type(2) > div > " + path)[prop]
-      return data;
-    }
+    const html = req.data.replaceAll("\n", "");
+    const dom = new JSDOM(html);
 
-    const dollar = findContent("p").match(/(\d+)(?:\,(\d{1,2}))?/)[0].replace(",", ".")
-    const date = findContent("small:nth-of-type(2)", "innerHTML").replace("<br>", "  ")
+    const dollar = dom.window.document
+      .querySelector("#dolar .field-content .recuadrotsmc .centrado > strong")
+      .textContent.match(/(\d+)(?:\,(\d{1,2}))?/)[0]
+      .replace(",", ".");
+    const date = dom.window.document.querySelector(
+      ".date-display-single"
+    ).textContent;
 
-    console.log({ dollar })
-    return { dollar, date, url }
+    return { dollar, date, url };
+
   } catch (e) {
     console.error(e.message);
     throw new Error(e.message);
